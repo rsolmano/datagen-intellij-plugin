@@ -31,12 +31,12 @@ jobs:
           echo "Current unreleased version: ${CURRENT_UNRELEASED_VERSION}"
 
           # Calculate new unreleased version (release version + minor increment)
-          IFS='.' read -r -a version_parts <<< "$NEW_RELEASE_VERSION"
+          IFS='.' read -r -a version_parts <<< "$CURRENT_UNRELEASED_VERSION"
           minor=${version_parts[1]}
           NEW_UNRELEASED_VERSION="${version_parts[0]}.$((minor + 1)).0"
 
-          echo "release_version=${NEW_RELEASE_VERSION}"
-          echo "release_version=${NEW_RELEASE_VERSION}" >> $GITHUB_OUTPUT
+          echo "release_version=${CURRENT_UNRELEASED_VERSION}"
+          echo "release_version=${CURRENT_UNRELEASED_VERSION}" >> $GITHUB_OUTPUT
           
           echo "new_unreleased_version=${NEW_UNRELEASED_VERSION}"
           echo "new_unreleased_version=${NEW_UNRELEASED_VERSION}" >> $GITHUB_OUTPUT
