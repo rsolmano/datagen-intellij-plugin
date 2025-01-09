@@ -51,17 +51,23 @@ jobs:
           echo "New release candidate version: ${RELEASE_CANDIDATE_VERSION}"
           echo "release_candidate_version=${RELEASE_CANDIDATE_VERSION}" >> $GITHUB_ENV
 
+      - name: Create release candidate branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b jetbrains/release-candidate/${{ env.release_version }}
+          git push --set-upstream origin jetbrains/release-candidate/${{ env.release_version }}
+
       - name: Update version
         run: |
           sed -i "s/^pluginVersion=.*/pluginVersion=${{ env.release_candidate_version }}/" gradle.properties
           cat gradle.properties
 
-      - name: Create release candidate branch and commit changes
+      - name: Commit changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          git checkout -b jetbrains/release-candidate/${{ env.release_version }}
           git add gradle.properties
           git commit -m "Prepares jetbrains plugin release candidate version for ${{ env.release_version }}"
-          git push --set-upstream origin jetbrains/release-candidate/${{ env.release_version }}
+          git push
