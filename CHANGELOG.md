@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## 1.1.0 - 2025-01-09
+
 ### Added
 
 - Numbers generation support
