@@ -76,6 +76,7 @@ jobs:
 
           gh release create jb-${{ env.release_candidate_version }} \
             --title jb-${{ env.release_candidate_version }} \
+            --prerelease \
             --verify-tag \
             --notes-file release-notes.md
 
