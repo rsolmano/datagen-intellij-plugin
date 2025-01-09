@@ -10,9 +10,10 @@ The lightweight plugin for generating data for testing, samples, demos, etc.
 
 ## Features
 #### UUID generation
-![UUID Generation](https://s1.gifyu.com/images/S1QnR.gif)
+![UUID Generation](https://media.giphy.com/media/5mjNmKx0mugOH01QiF/giphy.gif)
 
-
+#### Numbers generation
+![Numbers Generation](https://media.giphy.com/media/OvTqNwi4hABib4hHq3/giphy.gif)
 
 <!-- Plugin description end -->
 
