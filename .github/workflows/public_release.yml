@@ -2,19 +2,6 @@ name: Public release
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Specify the PROPERLY TESTED nightly build version to make a public release from'
-        required: true
-        type: string
-      release_type:
-        description: 'Specify the type of release'
-        required: true
-        type: choice
-        default: 'minor'
-        options:
-          - 'minor'
-          - 'major'
 
 jobs:
   prepare:
@@ -24,10 +11,10 @@ jobs:
       release_version: ${{ steps.calculate_versions.outputs.release_version }}
       new_unreleased_version: ${{ steps.calculate_versions.outputs.new_unreleased_version }}
     steps:
-      - name: Check if triggered from main branch
+      - name: Check if triggered from RC branch
         run: |
-          if [ "${{ github.ref }}" != 'refs/heads/main' ]; then
-            echo "This workflow is allowed to run only from main branch."
+          if [[ ! "${{ github.ref }}" =~ ^refs/heads/jetbrains/release-candidate/.*$ ]]; then
+            echo "This workflow is allowed to run only from RC branches matching 'jetbrains/release-candidate/**'."
             exit 1
           fi
 
@@ -36,41 +23,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Validate input nightly build version
-        run: |
-          [[ ! "${{ github.event.inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+-nightly.[0-9]+$ ]] && { echo "Error: The input version is not valid nightly build version for jetbrains plugin (x.y.z-nightly.i)"; exit 1; }
-          [[ $(git tag | grep jb-"${{ github.event.inputs.version }}") ]] || { echo "The input version does not exist"; exit 1; }
-          
-          NIGHTLY_VERSION=${{ github.event.inputs.version }}
-          NIGHTLY_BUILD_BASE_VERSION="${NIGHTLY_VERSION%-nightly.*}"
-          echo "Nightly build base: ${NIGHTLY_BUILD_BASE_VERSION}"
-          
-          LAST_RELEASE_TAG=$(git tag --list "jb-*" | grep -v "nightly" | sort -V | tail -n 1 || echo "jb-0.0.0")
-          LAST_RELEASE_VERSION="${LAST_RELEASE_TAG#jb-}"
-          echo "Last release version: ${LAST_RELEASE_VERSION}"
-
-          if [[ $(printf "%s\n%s" "$LAST_RELEASE_VERSION" "$NIGHTLY_BUILD_BASE_VERSION" | sort -V | tail -n 1) == "$LAST_RELEASE_VERSION" ]]; then
-            echo "Error: Nightly version ${NIGHTLY_BUILD_VERSION} is not higher than last release version ${LAST_RELEASE_VERSION}."
-            exit 1
-          fi
-
       - name: Calculate release version
         id: calculate_versions
         run: |
           GRADLE_VERSION=$(grep '^pluginVersion=' gradle.properties | cut -d'=' -f2)
-          CURRENT_UNRELEASED_VERSION=${GRADLE_VERSION%-SNAPSHOT}
-          echo "Gradle base version: ${CURRENT_UNRELEASED_VERSION}"
+          CURRENT_UNRELEASED_VERSION=${GRADLE_VERSION%-RC.*}
+          echo "Current unreleased version: ${CURRENT_UNRELEASED_VERSION}"
 
-          # Determine the new release version based on the release type
-          if [ "${{ github.event.inputs.release_type }}" == "major" ]; then
-            IFS='.' read -r -a version_parts <<< "$CURRENT_UNRELEASED_VERSION"
-            major=${version_parts[0]}
-            NEW_MAJOR_VERSION=$((major + 1)).0.0
-            NEW_RELEASE_VERSION="${NEW_MAJOR_VERSION}"
-          else
-            NEW_RELEASE_VERSION="${CURRENT_UNRELEASED_VERSION}"
-          fi
-          
           # Calculate new unreleased version (release version + minor increment)
           IFS='.' read -r -a version_parts <<< "$NEW_RELEASE_VERSION"
           minor=${version_parts[1]}
@@ -115,7 +74,7 @@ jobs:
 
           git checkout jb-${{ github.event.inputs.version }}
           
-          git checkout -b jb-release-${{ needs.prepare.outputs.release_version }}
+          git checkout -b jetbrains/release/${{ needs.prepare.outputs.release_version }}
 
       - name: Update version and patch changelog
         run: |
@@ -138,7 +97,7 @@ jobs:
           git add gradle.properties
           git add CHANGELOG.md
           git commit -m "Release jetbrains plugin version ${NEW_RELEASE_VERSION}"
-          git push --set-upstream origin jb-release-${{ needs.prepare.outputs.release_version }}
+          git push --set-upstream origin jetbrains/release/${{ needs.prepare.outputs.release_version }}
           git tag jb-${{ needs.prepare.outputs.release_version }}
           git push origin --tags
 
