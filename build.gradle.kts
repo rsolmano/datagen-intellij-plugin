@@ -157,5 +157,5 @@ intellijPlatformTesting {
 
 val runIntellijIdeaUltimate by intellijPlatformTesting.runIde.registering {
     type = IntelliJPlatformType.IntellijIdeaUltimate
-    version = "2024.2"
+    version = "2024.3"
 }
