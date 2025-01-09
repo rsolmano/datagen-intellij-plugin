@@ -1,0 +1,84 @@
+name: Public release
+
+on:
+  push:
+    branches:
+      - jetbrains/release-candidate/*
+
+jobs:
+  prepare:
+    name: Prepare release
+    runs-on: ubuntu-latest
+    outputs:
+      release_candidate_version: ${{ steps.calculate_versions.outputs.release_candidate_version }}
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: '${{ secrets.WORKFLOW_TOKEN }}'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-home-cache-cleanup: true
+
+      - name: Calculate new release candidate version
+        id: calculate_versions
+        run: |
+          GRADLE_VERSION=$(grep '^pluginVersion=' gradle.properties | cut -d'=' -f2)
+          prefix="${GRADLE_VERSION%-RC.*}"
+          number="${GRADLE_VERSION##*-RC.}"
+          incremented_number=$((number + 1))
+          NEW_RELEASE_CANDIDATE_VERSION="${prefix}-RC.${incremented_number}"
+
+          echo "release_candidate_version=${NEW_RELEASE_CANDIDATE_VERSION}"
+          echo "release_candidate_version=${NEW_RELEASE_CANDIDATE_VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Update version
+        run: |
+          sed -i "s/^pluginVersion=.*/pluginVersion=${{ needs.prepare.outputs.release_candidate_version }}/" gradle.properties
+          cat gradle.properties
+
+      - name: Publish Plugin
+        env:
+          PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
+          CERTIFICATE_CHAIN: ${{ secrets.CERTIFICATE_CHAIN }}
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          PRIVATE_KEY_PASSWORD: ${{ secrets.PRIVATE_KEY_PASSWORD }}
+          RELEASE_CHANNELS: nightly
+        run: ./gradlew publishPlugin
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add gradle.properties
+          git add CHANGELOG.md
+          git commit -m "Publishes jetbrains plugin release candidate version ${{ needs.prepare.outputs.release_candidate_version }}
+          git push
+          git tag jb-${{ needs.prepare.outputs.release_candidate_version }}
+          git push origin --tags
+
+      - name: Create Github Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ./gradlew getChangelog --console=plain -q --no-header --no-summary > release-notes.md
+
+          gh release create jb-${{ needs.prepare.outputs.release_candidate_version }} \
+            --title jb-${{ needs.prepare.outputs.release_candidate_version }} \
+            --verify-tag \
+            --notes-file release-notes.md
+
+      - name: Upload Release Asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload jb-${{ needs.prepare.outputs.release_candidate_version }} ./build/distributions/*

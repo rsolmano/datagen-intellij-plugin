@@ -1,0 +1,78 @@
+name: Create Release Candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Specify the type of release'
+        required: true
+        type: choice
+        default: 'minor'
+        options:
+          - 'minor'
+          - 'major'
+
+jobs:
+  create_release_candidate_branch:
+    runs-on: ubuntu-latest
+    outputs:
+      release_version: ${{ steps.calculate_versions.outputs.release_version }}
+      new_unreleased_version: ${{ steps.calculate_versions.outputs.new_unreleased_version }}
+    steps:
+      - name: Check if triggered from main branch
+        run: |
+          if [ "${{ github.ref }}" != 'refs/heads/main' ]; then
+            echo "This workflow is allowed to run only from main branch."
+            exit 1
+          fi
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Calculate release version
+        id: calculate_versions
+        run: |
+          GRADLE_VERSION=$(grep '^pluginVersion=' gradle.properties | cut -d'=' -f2)
+          CURRENT_UNRELEASED_VERSION=${GRADLE_VERSION%-SNAPSHOT}
+          echo "Gradle base version: ${CURRENT_UNRELEASED_VERSION}"
+
+          # Determine the new release version based on the release type
+          if [ "${{ github.event.inputs.release_type }}" == "major" ]; then
+            IFS='.' read -r -a version_parts <<< "$CURRENT_UNRELEASED_VERSION"
+            major=${version_parts[0]}
+            NEW_MAJOR_VERSION=$((major + 1)).0.0
+            NEW_RELEASE_VERSION="${NEW_MAJOR_VERSION}"
+          else
+            NEW_RELEASE_VERSION="${CURRENT_UNRELEASED_VERSION}"
+          fi
+          
+          echo "release_version=${NEW_RELEASE_VERSION}"
+          echo "release_version=${NEW_RELEASE_VERSION}" >> $GITHUB_OUTPUT
+          
+          RELEASE_CANDIDATE_VERSION="${NEW_RELEASE_VERSION}-RC.0"
+          echo "New release candidate version: ${RELEASE_CANDIDATE_VERSION}"
+          echo "release_candidate_version=${RELEASE_CANDIDATE_VERSION}" >> $GITHUB_OUTPUT
+
+#          # Calculate new unreleased version (release version + minor increment)
+#          IFS='.' read -r -a version_parts <<< "$NEW_RELEASE_VERSION"
+#          minor=${version_parts[1]}
+#          NEW_UNRELEASED_VERSION="${version_parts[0]}.$((minor + 1)).0"
+#
+#          echo "new_unreleased_version=${NEW_UNRELEASED_VERSION}"
+#          echo "new_unreleased_version=${NEW_UNRELEASED_VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Update version
+        run: |
+          sed -i "s/^pluginVersion=.*/pluginVersion=${{ needs.prepare.outputs.release_candidate_version }}/" gradle.properties
+          cat gradle.properties
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add gradle.properties
+          git commit -m "Prepares jetbrains plugin release candidate version for ${{ needs.prepare.outputs.release_version }}"
+          git push --set-upstream origin jb-release-${{ needs.prepare.outputs.release_version }}
+          git tag jb-${{ needs.prepare.outputs.release_version }}
+          git push origin --tags
