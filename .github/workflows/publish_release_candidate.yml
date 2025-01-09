@@ -1,4 +1,4 @@
-name: Public release
+name: Publish Release Candidate
 
 on:
   push:
