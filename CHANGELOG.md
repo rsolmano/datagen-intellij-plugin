@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Numbers generation support
+
 ## [1.0.0] - 2024-09-19
 
 ### Added
