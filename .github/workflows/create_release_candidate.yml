@@ -51,25 +51,17 @@ jobs:
           echo "New release candidate version: ${RELEASE_CANDIDATE_VERSION}"
           echo "release_candidate_version=${RELEASE_CANDIDATE_VERSION}" >> $GITHUB_ENV
 
-#          # Calculate new unreleased version (release version + minor increment)
-#          IFS='.' read -r -a version_parts <<< "$NEW_RELEASE_VERSION"
-#          minor=${version_parts[1]}
-#          NEW_UNRELEASED_VERSION="${version_parts[0]}.$((minor + 1)).0"
-#
-#          echo "new_unreleased_version=${NEW_UNRELEASED_VERSION}"
-#          echo "new_unreleased_version=${NEW_UNRELEASED_VERSION}" >> $GITHUB_ENV
-
       - name: Update version
         run: |
           sed -i "s/^pluginVersion=.*/pluginVersion=${{ env.release_candidate_version }}/" gradle.properties
           cat gradle.properties
 
-      - name: Commit changes
+      - name: Create release candidate branch and commit changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git checkout -b jetbrains/release-candidate/${{ env.release_version }}
           git add gradle.properties
           git commit -m "Prepares jetbrains plugin release candidate version for ${{ env.release_version }}"
-          git push --set-upstream origin jb-release-${{ env.release_version }}
-          git tag jb-${{ env.release_version }}
-          git push origin --tags
+          git push --set-upstream origin jetbrains/release-candidate/${{ env.release_version }}
