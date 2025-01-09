@@ -15,9 +15,6 @@ on:
 jobs:
   create_release_candidate_branch:
     runs-on: ubuntu-latest
-    outputs:
-      release_version: ${{ steps.calculate_versions.outputs.release_version }}
-      new_unreleased_version: ${{ steps.calculate_versions.outputs.new_unreleased_version }}
     steps:
       - name: Check if triggered from main branch
         run: |
@@ -48,11 +45,11 @@ jobs:
           fi
           
           echo "release_version=${NEW_RELEASE_VERSION}"
-          echo "release_version=${NEW_RELEASE_VERSION}" >> $GITHUB_OUTPUT
+          echo "release_version=${NEW_RELEASE_VERSION}" >> $GITHUB_ENV
           
           RELEASE_CANDIDATE_VERSION="${NEW_RELEASE_VERSION}-RC.0"
           echo "New release candidate version: ${RELEASE_CANDIDATE_VERSION}"
-          echo "release_candidate_version=${RELEASE_CANDIDATE_VERSION}" >> $GITHUB_OUTPUT
+          echo "release_candidate_version=${RELEASE_CANDIDATE_VERSION}" >> $GITHUB_ENV
 
 #          # Calculate new unreleased version (release version + minor increment)
 #          IFS='.' read -r -a version_parts <<< "$NEW_RELEASE_VERSION"
@@ -60,11 +57,11 @@ jobs:
 #          NEW_UNRELEASED_VERSION="${version_parts[0]}.$((minor + 1)).0"
 #
 #          echo "new_unreleased_version=${NEW_UNRELEASED_VERSION}"
-#          echo "new_unreleased_version=${NEW_UNRELEASED_VERSION}" >> $GITHUB_OUTPUT
+#          echo "new_unreleased_version=${NEW_UNRELEASED_VERSION}" >> $GITHUB_ENV
 
       - name: Update version
         run: |
-          sed -i "s/^pluginVersion=.*/pluginVersion=${{ needs.prepare.outputs.release_candidate_version }}/" gradle.properties
+          sed -i "s/^pluginVersion=.*/pluginVersion=${{ env.release_candidate_version }}/" gradle.properties
           cat gradle.properties
 
       - name: Commit changes
@@ -72,7 +69,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add gradle.properties
-          git commit -m "Prepares jetbrains plugin release candidate version for ${{ needs.prepare.outputs.release_version }}"
-          git push --set-upstream origin jb-release-${{ needs.prepare.outputs.release_version }}
-          git tag jb-${{ needs.prepare.outputs.release_version }}
+          git commit -m "Prepares jetbrains plugin release candidate version for ${{ env.release_version }}"
+          git push --set-upstream origin jb-release-${{ env.release_version }}
+          git tag jb-${{ env.release_version }}
           git push origin --tags
