@@ -1,12 +1,9 @@
 name: Publish Release Candidate
 
 on:
-  create:
-    branches:
-      - jetbrains/release-candidate/*
   push:
     branches:
-      - jetbrains/release-candidate/*
+      - 'jetbrains/release-candidate/**'
 
 jobs:
   prepare:
