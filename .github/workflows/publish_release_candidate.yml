@@ -38,6 +38,10 @@ jobs:
 
           echo "release_candidate_version=${NEW_RELEASE_CANDIDATE_VERSION}"
           echo "release_candidate_version=${NEW_RELEASE_CANDIDATE_VERSION}" >> $GITHUB_ENV
+          
+          LAST_RELEASE_TAG=$(git tag --list "jb-*" | grep -Ev "nightly|RC" | sort -V | tail -n 1 || echo "jb-0.0.0")
+          echo "last_release_tag=${LAST_RELEASE_TAG}"
+          echo "last_release_tag=${LAST_RELEASE_TAG}" >> $GITHUB_ENV
 
       - name: Update version
         run: |
@@ -67,7 +71,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ./gradlew getChangelog --console=plain -q --no-header --no-summary > release-notes.md
+          echo "#User facing changelog:\n\n" > release-notes.md
+          ./gradlew getChangelog --console=plain -q --no-header --no-summary >> release-notes.md
+          
+          echo "\n\n#Gitlog from latest release:\n\n" >> release-notes.md
+          git --no-pager log ${{ env.last_release_tag }}..HEAD --pretty=format:"- %s by %an (%ae)" -- 'plugins/jetbrains' 'libs/webview' >> release-notes.md
+          
 
           gh release create jb-${{ env.release_candidate_version }} \
             --title jb-${{ env.release_candidate_version }} \
