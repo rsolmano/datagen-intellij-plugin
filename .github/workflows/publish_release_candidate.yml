@@ -71,12 +71,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "#User facing changelog:\n\n" > release-notes.md
-          ./gradlew getChangelog --console=plain -q --no-header --no-summary >> release-notes.md
-          
-          echo "\n\n#Gitlog from latest release:\n\n" >> release-notes.md
-          git --no-pager log ${{ env.last_release_tag }}..HEAD --pretty=format:"- %s by %an (%ae)" -- 'plugins/jetbrains' 'libs/webview' >> release-notes.md
-          
+          echo "# User facing changelog:" > release-notes.md
+          ./gradlew getChangelog --console=plain -q --no-header --no-summary --unreleased >> release-notes.md
+          echo "# Gitlog from latest release:" >> release-notes.md
+          git --no-pager log ${{ env.last_release_tag }}..HEAD --pretty=format:"- %s by %an (%ae)" >> release-notes.md
 
           gh release create jb-${{ env.release_candidate_version }} \
             --title jb-${{ env.release_candidate_version }} \
