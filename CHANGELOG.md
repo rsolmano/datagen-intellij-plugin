@@ -3,6 +3,10 @@
 # datagen-intellij-plugin Changelog
 
 ## [Unreleased]
+### Added
+
+- Email generation support
+- Names generation support
 
 ## 1.1.0 - 2025-01-09
 
