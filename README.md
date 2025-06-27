@@ -9,11 +9,27 @@
 The lightweight plugin for generating data for testing, samples, demos, etc.
 
 ## Features
+
+### Data Generation
+- **UUID Generation** - Generate and insert random UUIDs
+- **Number Generation** - Generate random integers (1-999 or 1-999999)
+- **Email Generation** - Generate realistic email addresses with various patterns
+- **Name Generation** - Generate realistic names for testing and demos:
+  - **First Names** - Culturally diverse first names (Western and international)
+  - **Last Names** - Diverse surnames from multiple cultures
+  - **Full Names** - Complete names combining first and last names
+
+### Quick Access
+All generators are available through the **Generate** menu (Code → Generate) or by right-clicking in the editor.
+
 #### UUID generation
 ![UUID Generation](https://media.giphy.com/media/5mjNmKx0mugOH01QiF/giphy.gif)
 
 #### Numbers generation
 ![Numbers Generation](https://media.giphy.com/media/OvTqNwi4hABib4hHq3/giphy.gif)
+
+#### Name generation
+*Generate realistic names for test users, database population, and demos*
 
 <!-- Plugin description end -->
 

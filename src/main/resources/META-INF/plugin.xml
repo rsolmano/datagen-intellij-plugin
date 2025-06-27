@@ -10,6 +10,30 @@
 
     <actions>
         <action
+                id="com.solmano.GenerateFullNameAction"
+                class="com.solmano.datagen.actions.GenerateFullNameAction"
+                text="Full Name"
+                description="Generate and insert realistic full name (first + last)"
+                icon="/icons/datagen14x14.svg">
+            <add-to-group group-id="GenerateGroup" anchor="first"/>
+        </action>
+        <action
+                id="com.solmano.GenerateLastNameAction"
+                class="com.solmano.datagen.actions.GenerateLastNameAction"
+                text="Last Name"
+                description="Generate and insert realistic last name"
+                icon="/icons/datagen14x14.svg">
+            <add-to-group group-id="GenerateGroup" anchor="first"/>
+        </action>
+        <action
+                id="com.solmano.GenerateFirstNameAction"
+                class="com.solmano.datagen.actions.GenerateFirstNameAction"
+                text="First Name"
+                description="Generate and insert realistic first name"
+                icon="/icons/datagen14x14.svg">
+            <add-to-group group-id="GenerateGroup" anchor="first"/>
+        </action>
+        <action
                 id="com.solmano.GenerateEmailAction"
                 class="com.solmano.datagen.actions.GenerateEmailAction"
                 text="Email Address"
