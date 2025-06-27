@@ -10,6 +10,14 @@
 
     <actions>
         <action
+                id="com.solmano.GenerateEmailAction"
+                class="com.solmano.datagen.actions.GenerateEmailAction"
+                text="Email Address"
+                description="Generate and insert realistic email address"
+                icon="/icons/datagen14x14.svg">
+            <add-to-group group-id="GenerateGroup" anchor="first"/>
+        </action>
+        <action
                 id="com.solmano.Generate1to999999Action"
                 class="com.solmano.datagen.actions.Generate1to999999Action"
                 text="Int from 1 to 999999"
