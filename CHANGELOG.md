@@ -7,6 +7,11 @@
 
 - Email generation support
 - Names generation support
+- Lorem Ipsum text generation support with multiple length options:
+  - Single word generation
+  - Sentence generation (8-15 words)
+  - Short paragraph generation (3-5 sentences)
+  - Long paragraph generation (8-11 sentences)
 
 ## 1.1.0 - 2025-01-09
 

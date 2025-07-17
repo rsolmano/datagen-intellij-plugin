@@ -10,6 +10,38 @@
 
     <actions>
         <action
+                id="com.solmano.GenerateLoremLongParagraphAction"
+                class="com.solmano.datagen.actions.GenerateLoremLongParagraphAction"
+                text="Lorem Ipsum (Long Paragraph)"
+                description="Generate and insert Lorem Ipsum long paragraph (8-11 sentences)"
+                icon="/icons/datagen14x14.svg">
+            <add-to-group group-id="GenerateGroup" anchor="first"/>
+        </action>
+        <action
+                id="com.solmano.GenerateLoremShortParagraphAction"
+                class="com.solmano.datagen.actions.GenerateLoremShortParagraphAction"
+                text="Lorem Ipsum (Short Paragraph)"
+                description="Generate and insert Lorem Ipsum short paragraph (3-5 sentences)"
+                icon="/icons/datagen14x14.svg">
+            <add-to-group group-id="GenerateGroup" anchor="first"/>
+        </action>
+        <action
+                id="com.solmano.GenerateLoremSentenceAction"
+                class="com.solmano.datagen.actions.GenerateLoremSentenceAction"
+                text="Lorem Ipsum (Sentence)"
+                description="Generate and insert Lorem Ipsum sentence (8-15 words)"
+                icon="/icons/datagen14x14.svg">
+            <add-to-group group-id="GenerateGroup" anchor="first"/>
+        </action>
+        <action
+                id="com.solmano.GenerateLoremWordAction"
+                class="com.solmano.datagen.actions.GenerateLoremWordAction"
+                text="Lorem Ipsum (Word)"
+                description="Generate and insert single Lorem Ipsum word"
+                icon="/icons/datagen14x14.svg">
+            <add-to-group group-id="GenerateGroup" anchor="first"/>
+        </action>
+        <action
                 id="com.solmano.GenerateFullNameAction"
                 class="com.solmano.datagen.actions.GenerateFullNameAction"
                 text="Full Name"

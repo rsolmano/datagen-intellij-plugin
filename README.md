@@ -18,6 +18,11 @@ The lightweight plugin for generating data for testing, samples, demos, etc.
   - **First Names** - Culturally diverse first names (Western and international)
   - **Last Names** - Diverse surnames from multiple cultures
   - **Full Names** - Complete names combining first and last names
+- **Lorem Ipsum Text Generation** - Generate placeholder text for mockups and testing:
+  - **Single Word** - Generate random Lorem Ipsum words
+  - **Sentence** - Generate sentences with 8-15 words
+  - **Short Paragraph** - Generate paragraphs with 3-5 sentences
+  - **Long Paragraph** - Generate paragraphs with 8-11 sentences
 
 ### Quick Access
 All generators are available through the **Generate** menu (Code → Generate) or by right-clicking in the editor.

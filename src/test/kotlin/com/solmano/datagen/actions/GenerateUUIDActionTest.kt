@@ -385,4 +385,184 @@ class SimpleGenerateAndInsertActionsTest : BasePlatformTestCase() {
             }
         }
     }
+
+    fun `test lorem ipsum word generation and insertion`() {
+        val file = myFixture.configureByText("testFile.kt", "")
+        val editor: Editor = myFixture.editor
+
+        WriteCommandAction.runWriteCommandAction(project) {
+            val action = GenerateLoremWordAction()
+            val event = myFixture.testAction(action)
+        }
+
+        val documentText = editor.document.text
+        assertTrue("Document should not be empty after lorem word insertion", documentText.isNotEmpty())
+        assertTrue("Word should not contain spaces", !documentText.contains(" "))
+        assertTrue("Word should not contain periods", !documentText.contains("."))
+        assertTrue("Word should contain only letters", documentText.all { it.isLetter() })
+        assertTrue("Word should be at least 2 characters", documentText.length >= 2)
+    }
+
+    fun `test lorem ipsum sentence generation and insertion`() {
+        val file = myFixture.configureByText("testFile.kt", "")
+        val editor: Editor = myFixture.editor
+
+        WriteCommandAction.runWriteCommandAction(project) {
+            val action = GenerateLoremSentenceAction()
+            val event = myFixture.testAction(action)
+        }
+
+        val documentText = editor.document.text
+        assertTrue("Document should not be empty after lorem sentence insertion", documentText.isNotEmpty())
+        assertTrue("Sentence should end with period", documentText.endsWith("."))
+        assertTrue("Sentence should start with capital letter", documentText.first().isUpperCase())
+        
+        val wordCount = documentText.dropLast(1).split(" ").size
+        assertTrue("Sentence should have 8-15 words, got $wordCount", wordCount in 8..15)
+    }
+
+    fun `test lorem ipsum short paragraph generation and insertion`() {
+        val file = myFixture.configureByText("testFile.kt", "")
+        val editor: Editor = myFixture.editor
+
+        WriteCommandAction.runWriteCommandAction(project) {
+            val action = GenerateLoremShortParagraphAction()
+            val event = myFixture.testAction(action)
+        }
+
+        val documentText = editor.document.text
+        assertTrue("Document should not be empty after lorem short paragraph insertion", documentText.isNotEmpty())
+        assertTrue("Paragraph should start with 'Lorem ipsum'", documentText.startsWith("Lorem ipsum"))
+        assertTrue("Paragraph should end with period", documentText.endsWith("."))
+        
+        val sentences = documentText.split(". ")
+        assertTrue("Short paragraph should have 3-5 sentences, got ${sentences.size}", sentences.size in 3..5)
+    }
+
+    fun `test lorem ipsum long paragraph generation and insertion`() {
+        val file = myFixture.configureByText("testFile.kt", "")
+        val editor: Editor = myFixture.editor
+
+        WriteCommandAction.runWriteCommandAction(project) {
+            val action = GenerateLoremLongParagraphAction()
+            val event = myFixture.testAction(action)
+        }
+
+        val documentText = editor.document.text
+        assertTrue("Document should not be empty after lorem long paragraph insertion", documentText.isNotEmpty())
+        assertTrue("Paragraph should start with 'Lorem ipsum'", documentText.startsWith("Lorem ipsum"))
+        assertTrue("Paragraph should end with period", documentText.endsWith("."))
+        
+        val sentences = documentText.split(". ")
+        assertTrue("Long paragraph should have 8-11 sentences, got ${sentences.size}", sentences.size in 8..11)
+    }
+
+    fun `test lorem ipsum word variety and validity`() {
+        val generatedWords = mutableSetOf<String>()
+        
+        repeat(100) {
+            val file = myFixture.configureByText("testFile$it.kt", "")
+            val editor: Editor = myFixture.editor
+
+            WriteCommandAction.runWriteCommandAction(project) {
+                val action = GenerateLoremWordAction()
+                val event = myFixture.testAction(action)
+            }
+
+            val word = editor.document.text
+            generatedWords.add(word)
+            
+            // Validate each generated word
+            assertTrue("Word should be valid: '$word'", word.isNotEmpty())
+            assertTrue("Word should contain only letters: '$word'", word.all { it.isLetter() })
+            assertTrue("Word should be lowercase: '$word'", word.all { it.isLowerCase() })
+        }
+        
+        // Ensure we get variety in generated words (at least 20 different words in 100 generations)
+        assertTrue("Should generate variety of lorem words, got ${generatedWords.size} unique words", generatedWords.size >= 20)
+        
+        // Check for classic lorem ipsum words
+        val classicWords = setOf("lorem", "ipsum", "dolor", "sit", "amet", "consectetur", "adipiscing", "elit")
+        val hasClassicWords = generatedWords.intersect(classicWords).isNotEmpty()
+        assertTrue("Should include classic lorem ipsum words", hasClassicWords)
+    }
+
+    fun `test lorem ipsum sentence structure consistency`() {
+        repeat(50) {
+            val file = myFixture.configureByText("testFile$it.kt", "")
+            val editor: Editor = myFixture.editor
+
+            WriteCommandAction.runWriteCommandAction(project) {
+                val action = GenerateLoremSentenceAction()
+                val event = myFixture.testAction(action)
+            }
+
+            val sentence = editor.document.text
+            
+            // Validate sentence structure
+            assertTrue("Sentence should not be empty: '$sentence'", sentence.isNotEmpty())
+            assertTrue("Sentence should start with capital letter: '$sentence'", sentence.first().isUpperCase())
+            assertTrue("Sentence should end with period: '$sentence'", sentence.endsWith("."))
+            
+            // Count words (excluding the period)
+            val words = sentence.dropLast(1).split(" ")
+            assertTrue("Sentence should have 8-15 words, got ${words.size}: '$sentence'", words.size in 8..15)
+            
+            // Check that all words are valid (no empty strings)
+            assertTrue("All words should be non-empty: '$sentence'", words.all { it.isNotEmpty() })
+            
+            // Check that words contain only letters
+            assertTrue("All words should contain only letters: '$sentence'", 
+                words.all { word -> word.all { it.isLetter() } })
+        }
+    }
+
+    fun `test lorem ipsum paragraph text flow and readability`() {
+        val actions = listOf(
+            GenerateLoremShortParagraphAction(),
+            GenerateLoremLongParagraphAction()
+        )
+        
+        actions.forEach { action ->
+            repeat(10) { iteration ->
+                val file = myFixture.configureByText("testFile${action.javaClass.simpleName}$iteration.kt", "")
+                val editor: Editor = myFixture.editor
+
+                WriteCommandAction.runWriteCommandAction(project) {
+                    val event = myFixture.testAction(action)
+                }
+
+                val paragraph = editor.document.text
+                
+                // Basic validation
+                assertTrue("Paragraph should not be empty: '$paragraph'", paragraph.isNotEmpty())
+                assertTrue("Paragraph should start with Lorem ipsum: '$paragraph'", paragraph.startsWith("Lorem ipsum"))
+                assertTrue("Paragraph should end with period: '$paragraph'", paragraph.endsWith("."))
+                
+                // Check sentence structure
+                val sentences = paragraph.split(". ")
+                assertTrue("Paragraph should have multiple sentences: '$paragraph'", sentences.size > 1)
+                
+                // Validate each sentence (except the last one which already ends with period)
+                sentences.dropLast(1).forEach { sentence ->
+                    assertTrue("Each sentence should not be empty: '$sentence'", sentence.isNotEmpty())
+                    assertTrue("Each sentence should start with capital letter: '$sentence'", sentence.first().isUpperCase())
+                    
+                    val words = sentence.split(" ")
+                    assertTrue("Each sentence should have multiple words: '$sentence'", words.size > 1)
+                    assertTrue("Each sentence should have reasonable length: '$sentence'", words.size <= 20)
+                }
+                
+                // Check word count distribution
+                val totalWords = paragraph.split(" ").size
+                val expectedMinWords = when (action) {
+                    is GenerateLoremShortParagraphAction -> 30  // 3 sentences * ~10 words
+                    is GenerateLoremLongParagraphAction -> 80   // 8 sentences * ~10 words
+                    else -> 0
+                }
+                assertTrue("Paragraph should have reasonable word count, got $totalWords words: '$paragraph'", 
+                    totalWords >= expectedMinWords)
+            }
+        }
+    }
 }
